@@ -1,1 +1,192 @@
-heloo this is MATERIAL MANAGEMEN
+<!-- hello dost -->
+<!-- this is pmg sccs bel ghaziabad 's material mangement system' -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Management System</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #0078D7;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+}
+
+nav {
+  background: #f4f4f4;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+}
+
+nav button {
+  background: #0078D7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+nav button:hover {
+  background: #005bb5;
+}
+
+main {
+  padding: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Material Gate In-Out & Store Management System</h1>
+  </header>
+
+  <nav>
+    <button onclick="showSection('dashboard')">Dashboard</button>
+    <button onclick="showSection('gate-in')">Gate In</button>
+    <button onclick="showSection('gate-out')">Gate Out</button>
+    <button onclick="showSection('inventory')">Inventory</button>
+  </nav>
+
+  <main>
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section">
+      <h2>Dashboard</h2>
+      <p>Total Stock: <span id="total-stock">0</span></p>
+      <p>Recent Activities:</p>
+      <ul id="recent-activities"></ul>
+    </section>
+
+    <!-- Gate In Section -->
+    <section id="gate-in" class="section hidden">
+      <h2>Gate In</h2>
+      <form id="gate-in-form">
+        <label for="item-name-in">Item Name:</label>
+        <input type="text" id="item-name-in" required>
+        <label for="quantity-in">Quantity:</label>
+        <input type="number" id="quantity-in" min="1" required>
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <!-- Gate Out Section -->
+    <section id="gate-out" class="section hidden">
+      <h2>Gate Out</h2>
+      <form id="gate-out-form">
+        <label for="item-name-out">Item Name:</label>
+        <input type="text" id="item-name-out" required>
+        <label for="quantity-out">Quantity:</label>
+        <input type="number" id="quantity-out" min="1" required>
+        <button type="submit">Remove</button>
+      </form>
+    </section>
+
+    <!-- Inventory Section -->
+    <section id="inventory" class="section hidden">
+      <h2>Inventory</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-table"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // State to manage inventory and recent activities
+const state = {
+  inventory: {},
+  activities: [],
+};
+
+// Function to switch sections
+function showSection(sectionId) {
+  document.querySelectorAll('.section').forEach(section => {
+    section.classList.add('hidden');
+  });
+  document.getElementById(sectionId).classList.remove('hidden');
+}
+
+// Update the inventory table
+function updateInventory() {
+  const inventoryTable = document.getElementById('inventory-table');
+  inventoryTable.innerHTML = '';
+  for (const [item, quantity] of Object.entries(state.inventory)) {
+    const row = `<tr><td>${item}</td><td>${quantity}</td></tr>`;
+    inventoryTable.innerHTML += row;
+  }
+  document.getElementById('total-stock').textContent = Object.values(state.inventory).reduce((a, b) => a + b, 0);
+}
+
+// Update recent activities
+function updateActivities(activity) {
+  state.activities.unshift(activity);
+  const recentActivities = document.getElementById('recent-activities');
+  recentActivities.innerHTML = state.activities.slice(0, 5).map(a => `<li>${a}</li>`).join('');
+}
+
+// Handle Gate In Form Submission
+document.getElementById('gate-in-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const itemName = document.getElementById('item-name-in').value.trim();
+  const quantity = parseInt(document.getElementById('quantity-in').value, 10);
+
+  if (!itemName || quantity <= 0) return alert('Invalid input!');
+
+  state.inventory[itemName] = (state.inventory[itemName] || 0) + quantity;
+  updateInventory();
+  updateActivities(`Gate In: ${quantity} x ${itemName}`);
+  event.target.reset();
+});
+
+// Handle Gate Out Form Submission
+document.getElementById('gate-out-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const itemName = document.getElementById('item-name-out').value.trim();
+  const quantity = parseInt(document.getElementById('quantity-out').value, 10);
+
+  if (!itemName || quantity <= 0 || (state.inventory[itemName] || 0) < quantity) return alert('Invalid input!');
+
+  state.inventory[itemName] -= quantity;
+  if (state.inventory[itemName] <= 0) delete state.inventory[itemName];
+  updateInventory();
+  updateActivities(`Gate Out: ${quantity} x ${itemName}`);
+  event.target.reset();
+});
+
+  </script>
+</body>
+</html>
